@@ -1,0 +1,27 @@
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "CryptoResearchAgent",
+  "description": "Pay-per-query AI crypto market analysis agent — $0.50 USDC per report via x402 on GOAT Network",
+  "services": [
+    {
+      "name": "x402",
+      "endpoint": "https://crypto-research-agent.railway.app/api/research/order",
+      "version": "1.0.0"
+    },
+    {
+      "name": "research",
+      "endpoint": "https://crypto-research-agent.railway.app/api/research/confirm",
+      "version": "1.0.0",
+      "skills": ["crypto-market-analysis", "price-trend", "btc", "eth", "sol"],
+      "domains": ["finance", "crypto", "defi"]
+    }
+  ],
+  "x402Support": true,
+  "active": true,
+  "registrations": [
+    {
+      "agentRegistry": "eip155:2345:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "agentId": 1
+    }
+  ]
+}
