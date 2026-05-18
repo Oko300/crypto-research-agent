@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CryptoResearchAgent</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0a0a; color: #e8e8e8; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 40px 20px;
+    }
+    .card {
+      background: #111; border: 1px solid #222;
+      border-radius: 16px; padding: 32px;
+      width: 100%; max-width: 680px;
+    }
+    .logo { font-size: 32px; margin-bottom: 6px; }
+    h1 { font-size: 22px; font-weight: 600; color: #fff; }
+    .subtitle { font-size: 13px; color: #666; margin-top: 4px; margin-bottom: 28px; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; padding: 4px 10px; border-radius: 20px;
+      background: #1a1a1a; border: 1px solid #2a2a2a;
+      color: #888; margin-bottom: 24px;
+    }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    label { font-size: 13px; color: #888; display: block; margin-bottom: 8px; }
+    textarea {
+      width: 100%; background: #0d0d0d; border: 1px solid #222;
+      border-radius: 10px; padding: 14px; color: #e8e8e8;
+      font-size: 15px; resize: vertical; min-height: 90px;
+      font-family: inherit; outline: none;
+    }
+    textarea:focus { border-color: #333; }
+    button {
+      margin-top: 14px; width: 100%; padding: 14px;
+      background: #f7931a; border: none; border-radius: 10px;
+      color: #000; font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    button:hover { opacity: 0.85; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .status {
+      margin-top: 16px; font-size: 13px; color: #666;
+      min-height: 20px; text-align: center;
+    }
+    .result {
+      margin-top: 20px; background: #0d0d0d;
+      border: 1px solid #1e1e1e; border-radius: 12px;
+      padding: 20px; display: none;
+    }
+    .result-header {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 12px;
+    }
+    .result-title { font-size: 13px; font-weight: 600; color: #888; }
+    .provider-badge {
+      font-size: 11px; padding: 3px 8px; border-radius: 6px;
+      background: #1a2a1a; color: #22c55e; border: 1px solid #1e3a1e;
+    }
+    .report-text {
+      font-size: 14px; line-height: 1.7; color: #ccc;
+      white-space: pre-wrap;
+    }
+    .proof {
+      margin-top: 14px; padding: 10px 14px;
+      background: #111827; border-radius: 8px;
+      font-size: 11px; color: #4b5563; font-family: monospace;
+    }
+    .market-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 8px; margin-top: 14px;
+    }
+    .market-item {
+      background: #111; border: 1px solid #1e1e1e;
+      border-radius: 8px; padding: 10px 12px;
+    }
+    .market-coin { font-size: 11px; color: #666; text-transform: uppercase; }
+    .market-price { font-size: 16px; font-weight: 600; color: #fff; margin-top: 2px; }
+    .market-change { font-size: 12px; margin-top: 2px; }
+    .up { color: #22c55e; } .down { color: #ef4444; }
+    .divider { border: none; border-top: 1px solid #1a1a1a; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">🐐</div>
+    <h1>CryptoResearchAgent</h1>
+    <p class="subtitle">AI-powered market analysis · Powered by x402 + ERC-8004 on GOAT Network</p>
+
+    <div class="badge">
+      <div class="dot"></div>
+      <span id="status-badge">Checking agent status...</span>
+    </div>
+
+    <label>Ask a crypto market question</label>
+    <textarea id="query" placeholder="e.g. What is Bitcoin doing today? Is ETH bullish? Analyse SOL price action..."></textarea>
+
+    <button id="btn" onclick="submitQuery()">🔍 Get Research Report (DEV MODE — Free)</button>
+    <div class="status" id="status"></div>
+
+    <div class="result" id="result">
+      <div class="result-header">
+        <span class="result-title">📊 AI MARKET ANALYSIS</span>
+        <span class="provider-badge" id="provider">gemini</span>
+      </div>
+      <div class="report-text" id="report"></div>
+      <hr class="divider"/>
+      <div class="market-grid" id="market-grid"></div>
+      <div class="proof" id="proof"></div>
+    </div>
+  </div>
+
+  <script>
+    // Check agent health on load
+    fetch('/api/health')
+      .then(r => r.json())
+      .then(d => {
+        document.getElementById('status-badge').textContent =
+          `Agent ${d.agentId !== 'not registered yet' ? '#' + d.agentId + ' · ' : ''}${d.x402} · ${d.price}`;
+      })
+      .catch(() => {
+        document.getElementById('status-badge').textContent = 'Agent offline';
+      });
+
+    async function submitQuery() {
+      const query = document.getElementById('query').value.trim();
+      if (!query) return alert('Please enter a question first.');
+
+      const btn = document.getElementById('btn');
+      const status = document.getElementById('status');
+      const result = document.getElementById('result');
+
+      btn.disabled = true;
+      result.style.display = 'none';
+      status.textContent = '⏳ Fetching live market data...';
+
+      try {
+        const res = await fetch('/api/research/order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ walletAddress: '0x0000000000000000000000000000000000000001', query })
+        });
+
+        const data = await res.json();
+
+        if (data.error) throw new Error(data.error);
+
+        // Dev mode returns report directly
+        if (data.devMode) {
+          showResult(data);
+          status.textContent = '✅ Done — DEV MODE (no payment required)';
+        } else {
+          // Production: handle payment flow
+          status.textContent = '💳 Payment required — MetaMask will open...';
+          // Payment flow goes here when x402 credentials are live
+          showResult(data);
+        }
+      } catch (err) {
+        status.textContent = '❌ Error: ' + err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function showResult(data) {
+      document.getElementById('result').style.display = 'block';
+      document.getElementById('report').textContent = data.report || 'No report returned.';
+      document.getElementById('provider').textContent =
+        (data.provider === 'openrouter' ? '🔄 OpenRouter (fallback)' : '✨ Gemini');
+
+      // Market data cards
+      const grid = document.getElementById('market-grid');
+      grid.innerHTML = '';
+      if (data.marketData) {
+        Object.entries(data.marketData).forEach(([coin, d]) => {
+          const change = d.usd_24h_change?.toFixed(2);
+          const up = change >= 0;
+          grid.innerHTML += `
+            <div class="market-item">
+              <div class="market-coin">${coin}</div>
+              <div class="market-price">$${Number(d.usd).toLocaleString()}</div>
+              <div class="market-change ${up ? 'up' : 'down'}">${up ? '▲' : '▼'} ${Math.abs(change)}%</div>
+            </div>`;
+        });
+      }
+
+      // Proof
+      const proofEl = document.getElementById('proof');
+      if (data.proof?.txHash) {
+        proofEl.textContent = `x402 proof: ${data.proof.txHash}`;
+        proofEl.style.display = 'block';
+      } else {
+        proofEl.textContent = `DEV MODE — payment proof available after x402 credentials`;
+      }
+    }
+  </script>
+</body>
+</html>
