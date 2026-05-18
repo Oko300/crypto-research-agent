@@ -8,13 +8,21 @@
     {
       "name": "research",
       "endpoint": "http://localhost:3001/api/research/order",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "skills": [
+        "crypto-market-analysis",
+        "btc",
+        "eth",
+        "sol"
+      ]
     }
   ],
   "registrations": [
     {
       "agentRegistry": "eip155:2345:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
-      "agentId": 1
+      "agentId": 1,
+      "txHash": "0xd910d6c0a296f464f17d27269e5b6c1d75c8e6cd806f7fba78aec6dabf529f38",
+      "network": "goat-testnet3"
     }
   ]
 }
