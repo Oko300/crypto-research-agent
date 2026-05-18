@@ -1,0 +1,20 @@
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "CryptoResearchAgent",
+  "description": "Pay-per-query AI crypto market analysis agent via x402 on GOAT Network",
+  "x402Support": true,
+  "active": true,
+  "services": [
+    {
+      "name": "research",
+      "endpoint": "http://localhost:3001/api/research/order",
+      "version": "1.0.0"
+    }
+  ],
+  "registrations": [
+    {
+      "agentRegistry": "eip155:2345:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "agentId": 1
+    }
+  ]
+}
