@@ -7,7 +7,7 @@
   "services": [
     {
       "name": "research",
-      "endpoint": "http://localhost:3001/api/research/order",
+      "endpoint": "https://crypto-research-agent-z7ae.onrender.com/api/research/order",
       "version": "1.0.0",
       "skills": [
         "crypto-market-analysis",
